@@ -1,1 +1,4 @@
 .DS_Store
+test*.js
+/input.txt
+/output.txt
