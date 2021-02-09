@@ -57,9 +57,9 @@ class Heap {
     let leftIndex = this.getLeftChildIndex(index);
     let rightIndex = this.getRightChildIndex(index);
 
-    while (left < this.size) {
+    while (leftIndex < this.size) {
       const target =
-        right < this.size &&
+        rightIndex < this.size &&
         this.comp(this.items[rightIndex], this.items[leftIndex])
           ? rightIndex
           : leftIndex;
