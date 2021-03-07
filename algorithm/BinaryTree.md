@@ -1,6 +1,107 @@
 # 이진 트린
 
-## 1. 이진 검색 트리
+## 1. 이진 트리 순회
+
+```javascript
+class BinaryTreeNode {
+  constructor(val) {
+    this.value = val;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+class BinaryTree {
+  constructor() {
+    this._root = null;
+  }
+
+  // 선순위 순회
+  traversePreOreder(node = this._root) {
+    if (node instanceof BinaryTreeNode) {
+      console.log(node.value);
+      if (node.left) this.traversePreOreder(node.left);
+      if (node.right) this.traversePreOreder(node.right);
+    }
+  }
+
+  // 재귀를 사용하지 않는 선순위 순회
+  traversePreOrederIterative(node = this._root) {
+    const nodeStack = [];
+    if (node instanceof BinaryTreeNode) nodeStack.push(node);
+
+    while (nodeStack.length > 0) {
+      const cur = nodeStack.pop();
+      console.log(cur.value);
+
+      if (cur.right) nodeStack.push(cur.right);
+      if (cur.left) nodeStack.push(cur.left);
+    }
+  }
+
+  // 중순위 순회
+  traverseInOrder(node = this._root) {
+    if (node instanceof BinaryTreeNode) {
+      if (node.left) this.traverseInOrder(node.left);
+      console.log(node.value);
+      if (node.right) this.traverseInOrder(node.right);
+    }
+  }
+
+  // 재귀를 사용하지 않는 중순위 선회
+  traverseInOrderOterative(node = this._root) {
+    const cur = node;
+    const stack = [];
+
+    while (true) {
+      if (cur !== null) {
+        stack.push(cur);
+        cur = cur.left;
+        continue;
+      }
+
+      if (stack.length > 0) {
+        cur = stack.pop();
+        console.log(cur.value);
+        cur = cur.right;
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  // 후순위 선회
+  traversePostOrder(node = this._root) {
+    if (node instanceof BinaryTreeNode) {
+      if (node.left) this.traversePostOrder(node.left);
+      if (node.right) this.traversePostOrder(node.right);
+      console.log(node.value);
+    }
+  }
+
+  // 재귀를 사용하지 않는 후순위 순회
+  traversePostOrderIterative(node = this._root) {
+    const stack1 = [];
+    const stack2 = [];
+    if (node instanceof BinaryTreeNode) stack1.push(node);
+
+    while (stack1.length > 0) {
+      const cur = stack1.pop();
+      stack2.push(cur.value);
+
+      if (cur.left) stack1.push(cur.left);
+      if (cur.right) stack1.push(cur.right);
+    }
+
+    while (stack2.length > 0) {
+      console.log(stack2.pop());
+    }
+  }
+}
+```
+
+## 2. 이진 검색 트리
 
 ```javascript
 class BinaryTreeNode {
@@ -84,7 +185,7 @@ class BinarySearchTree {
 }
 ```
 
-## 2. Red-Black Tree
+## 3. Red-Black Tree
 
 ```javascript
 class RedBlackTreeNode {
