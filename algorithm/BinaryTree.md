@@ -187,51 +187,109 @@ class BinarySearchTree {
 
 ## 3. Red-Black Tree
 
+DELETE 하는 과정을 충분히 이해하지 못해, `deleteFixup` 과정에서 `sibiling`이 `NIL`이 되어 `TypeError`가 발생하는 에러가 존재한다.
+
 ```javascript
-class RedBlackTreeNode {
+class Node {
   static BLACK = 0;
   static RED = 1;
 
-  constructor(value) {
+  static NIL = new Node();
+
+  static createNode(value, parent) {
+    const node = new Node(value, parent);
+    node.left = Node.NIL;
+    node.right = Node.NIL;
+
+    return node;
+  }
+
+  constructor(value = null, parent = null) {
     this.value = value;
-    this.color = RedBlackTreeNode.BLACK;
+    this.color = Node.BLACK;
 
     this.left = null;
     this.right = null;
-    this.parent = null;
+    this.parent = parent;
   }
 
   get isRed() {
-    return this.color === RedBlackTreeNode.RED;
+    return this.color === Node.RED;
   }
 
   get isBlack() {
-    return this.color === RedBlackTreeNode.BLACK;
+    return this.color === Node.BLACK;
+  }
+
+  get isNil() {
+    return this === Node.NIL;
   }
 }
 
 class RedBlackTree {
-  constructor(arr) {
-    this.root = null;
+  constructor() {
+    this.root = Node.NIL;
+    this.size = 0;
+  }
 
-    if (Array.isArray(arr)) {
-      arr.forEach((value) => this.insert(value));
+  clear() {
+    this.root = Node.NIL;
+    this.size = 0;
+  }
+
+  isRoot(node) {
+    return this.root === node;
+  }
+
+  isLeftChild(node) {
+    if (this.isRoot(node)) return false;
+    return node.parent.left === node;
+  }
+
+  isRightChild(node) {
+    if (this.isRoot(node)) return false;
+    return node.parent.right === node;
+  }
+
+  minNode(node = this.root) {
+    if (this.size === 0) return null;
+
+    while (!node.left.isNil) {
+      node = node.left;
     }
+
+    return node;
+  }
+
+  maxNode(node = this.root) {
+    if (this.size === 0) return null;
+
+    while (!node.right.isNil) {
+      node = node.right;
+    }
+
+    return node;
+  }
+
+  transplant(target, replace) {
+    if (this.isRoot(target)) this.root = replace;
+    else if (this.isLeftChild(target)) target.parent.left = replace;
+    else target.parent.right = replace;
+
+    if (!replace.isNil) replace.parent = target.parent; // nil no parent
   }
 
   rotateLeft(node) {
     const right = node.right;
 
     node.right = right.left;
-    if (right.left) right.left.parent = node;
+    if (!right.left.isNil) right.left.parent = node;
 
     right.parent = node.parent;
-    if (node.parent) {
-      if (node === node.parent.left) node.parent.left = right;
-      else node.parent.right = right;
-    } else {
-      this.root = right;
-    }
+
+    if (this.isRoot(node)) this.root = right;
+    else if (this.isLeftChild(node)) node.parent.left = right;
+    else node.parent.right = right;
 
     right.left = node;
     node.parent = right;
@@ -241,112 +299,251 @@ class RedBlackTree {
     const left = node.left;
 
     node.left = left.right;
-    if (left.right) left.right.parent = node;
+    if (!left.right.isNil) left.right.parent = node;
 
     left.parent = node.parent;
-    if (node.parent) {
-      if (node === node.parent.right) node.parent.right = left;
-      else node.parent.left = left;
-    } else {
-      this.root = left;
-    }
+
+    if (this.isRoot(node)) this.root = left;
+    else if (this.isRightChild(node)) node.parent.right = left;
+    else node.parent.left = left;
 
     left.right = node;
     node.parent = left;
   }
 
-  restructure(node) {
-    function recolor(uncle) {
-      node.parent.color = RedBlackTreeNode.BLACK;
-      uncle.color = RedBlackTreeNode.BLACK;
-      node.parent.parent.color = RedBlackTreeNode.RED;
-      node = node.parent.parent;
-    }
+  insertFixup(node) {
+    while (!this.isRoot(node) && node.parent.isRed) {
+      if (this.isLeftChild(node.parent)) {
+        let uncle = node.parent.parent.right;
 
-    while (node.parent && node.parent.isRed) {
-      if (node.parent === node.parent.parent.left) {
-        const uncle = node.parent.parent.right;
+        if (uncle.isRed) {
+          node.parent.color = Node.BLACK;
+          node.parent.parent.color = Node.RED;
+          uncle = Node.BLACK;
 
-        if (uncle === null || uncle.isBlack) {
-          if (node === node.parent.right) {
+          node = node.parent.parent;
+        } else {
+          if (this.isRightChild(node)) {
             node = node.parent;
             this.rotateLeft(node);
           }
 
-          node.parent.color = RedBlackTreeNode.BLACK;
-          node.parent.parent.color = RedBlackTreeNode.RED;
+          node.parent.color = Node.BLACK;
+          node.parent.parent.color = Node.RED;
           this.rotateRight(node.parent.parent);
-        } else {
-          recolor(uncle);
         }
       } else {
-        const uncle = node.parent.parent.left;
+        let uncle = node.parent.parent.left;
 
-        if (uncle === null || uncle.isBlack) {
-          if (node === node.parent.left) {
+        if (uncle.isRed) {
+          node.parent.color = Node.BLACK;
+          node.parent.parent.color = Node.RED;
+          uncle = Node.BLACK;
+
+          node = node.parent.parent;
+        } else {
+          if (this.isLeftChild(node)) {
             node = node.parent;
             this.rotateRight(node);
           }
 
-          node.parent.color = RedBlackTreeNode.BLACK;
-          node.parent.parent.color = RedBlackTreeNode.RED;
+          node.parent.color = Node.BLACK;
+          node.parent.parent.color = Node.RED;
           this.rotateLeft(node.parent.parent);
-        } else {
-          recolor(uncle);
         }
       }
     }
 
-    this.root.color = RedBlackTreeNode.BLACK;
+    this.root.color = Node.BLACK;
+  }
+
+  deleteFixup(node) {
+    while (!this.isRoot(node) && node.isBlack) {
+      if (this.isLeftChild(node)) {
+        let sibling = node.parent.right;
+
+        if (sibling.isRed) {
+          sibling.color = Node.BLACK;
+          node.parent.color = Node.RED;
+
+          this.rotateLeft(node.parent);
+          sibling = node.parent.right;
+        }
+
+        if (sibling.left.isBlack && sibling.right.isBlack) {
+          sibling.color = Node.RED;
+          node = node.parent;
+        } else if (sibling.right.isBlack) {
+          sibling.color = Node.RED;
+          sibling.left.color = Node.BLACK;
+
+          this.rotateRight(sibling);
+          sibling = node.parent.right;
+        }
+
+        if (sibling.right.isRed) {
+          sibling.color = node.parent.color;
+          sibling.right.color = Node.BLACK;
+          node.parent.color = Node.BLACK;
+
+          this.rotateLeft(node.parent);
+          node = this.root;
+        }
+      } else {
+        let sibling = node.parent.left;
+
+        if (sibling.isRed) {
+          sibling.color = Node.BLACK;
+          node.parent.color = Node.RED;
+
+          this.rotateRight(node.parent);
+          sibling = node.parent.left;
+        }
+
+        if (sibling.isNil) throw new ReferenceError();
+
+        if (sibling.left.isBlack && sibling.right.isBlack) {
+          sibling.color = Node.RED;
+          node = node.parent;
+        } else if (sibling.left.isBlack) {
+          sibling.color = Node.RED;
+          sibling.right.color = Node.BLACK;
+
+          this.rotateLeft(sibling);
+          sibling = node.parent.left;
+        }
+
+        if (sibling.left.isRed) {
+          sibling.color = node.parent.color;
+          sibling.left.color = Node.BLACK;
+          node.parent.color = Node.BLACK;
+
+          this.rotateRight(node.parent);
+          node = this.root;
+        }
+      }
+    }
+
+    node.color = Node.BLACK;
   }
 
   find(value) {
     let node = this.root;
 
-    while (node) {
+    while (!node.isNil) {
       if (node.value > value) node = node.left;
       else if (node.value < value) node = node.right;
       else break;
     }
 
-    return node;
+    return node.isNil ? null : node;
   }
 
   insert(value) {
-    const node = new RedBlackTreeNode(value);
+    const node = Node.createNode(value);
 
-    if (this.root === null) {
+    if (this.root.isNil) {
       this.root = node;
-      return node;
-    }
+    } else {
+      let current = this.root;
+      let parent = null;
 
-    let parent = this.root;
-    node.color = RedBlackTreeNode.RED;
+      while (!current.isNil) {
+        parent = current;
 
-    while (true) {
-      if (parent.value > value) {
-        if (parent.left === null) {
-          parent.left = node;
-          node.parent = parent;
-          break;
-        } else {
-          parent = parent.left;
-        }
-      } else if (parent.value < value) {
-        if (parent.right === null) {
-          parent.right = node;
-          node.parent = parent;
-          break;
-        } else {
-          parent = parent.right;
-        }
-      } else {
-        return parent;
+        if (value > current.value) current = current.right;
+        else current = current.left;
+        // else if (value < current.value) current = current.left;
+        // else return current;
       }
+
+      node.parent = parent;
+      node.color = Node.RED;
+
+      if (value > parent.value) parent.right = node;
+      else parent.left = node;
+
+      this.insertFixup(node);
     }
 
-    this.restructure(node);
+    this.size += 1;
+
+    return node;
+  }
+
+  // target: 실제 삭제가 발생하여, 빈 자리를 직계 자식 노드로 대체해야하는 곳의 원래 노드
+  // targetColor: 실제 삭제가 발생하여, 빈 자리를 직계 자식 노드로 대체해야하는 곳의 원래 노드
+  // child: 실제 삭제가 발생하여, 빈 자리를 대체하는 직계 자식 노드
+  deleteNode(node) {
+    let target = node;
+    let targetColor = target.color;
+    let child = null;
+
+    if (node.left.isNil) {
+      child = target.right;
+      this.transplant(target, target.right);
+    } else if (node.right.isNil) {
+      child = target.left;
+      this.transplant(target, target.left);
+    } else {
+      target = this.minNode(node.right);
+      targetColor = target.color;
+      child = target.right;
+
+      this.transplant(target, target.right);
+      this.transplant(node, target);
+
+      target.color = node.color;
+      target.right = node.right;
+      target.right.parent = target;
+      target.left = node.left;
+      target.left.parent = left;
+    }
+
+    if (!child.isNil && targetColor === Node.BLACK) {
+      this.deleteFixup(child);
+    }
+
+    this.size -= 1;
+  }
+
+  delete(value) {
+    const node = this.find(value);
+    if (node) this.removeNode(node);
+
     return node;
   }
 }
+
+const t = +input[0];
+const tree = new RedBlackTree();
+const ans = [];
+
+const ops = {
+  I(num) {
+    tree.insert(num);
+  },
+  D(num) {
+    const node = num > 0 ? tree.maxNode() : tree.minNode();
+    if (node) tree.deleteNode(node);
+  },
+};
+
+for (let i = 0, s = 1; i < t; i += 1) {
+  const k = +input[s];
+  const next = s + k + 1;
+
+  tree.clear();
+
+  for (let j = s + 1; j < next; j += 1) {
+    const [op, param] = input[j].split(" ");
+    ops[op](+param);
+  }
+
+  if (tree.size === 0) ans[ans.length] = "EMPTY";
+  else ans[ans.length] = `${tree.maxNode().value} ${tree.minNode().value}`;
+  s = next;
+}
+
+console.log(ans.join("\n"));
 ```
