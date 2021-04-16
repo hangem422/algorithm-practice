@@ -6,8 +6,8 @@
 function fastPow(base, exp, mod) {
   let res = 1;
 
-  for (; exp; exp >>= 1, base = (base * base) & mod) {
-    if (exp & 1) res = (res * base) & mod;
+  for (; exp; exp >>= 1, base = (base * base) % mod) {
+    if (exp & 1) res = (res * base) % mod;
   }
 
   return result;
