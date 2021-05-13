@@ -22,7 +22,7 @@ class Graph {
     this.edges.get(origin).set(dest, weight);
   }
 
-  removeEdge(origin, dest, weight) {
+  removeEdge(origin, dest) {
     if (!this.edges.has(origin)) return;
     this.edges.get(origin).delete(dest);
   }
@@ -168,6 +168,26 @@ class Graph {
 
     return dist;
   }
+
+  topologicalSort() {
+    const visited = new Map();
+    const stack = [];
+
+    const topologicalSortUtil = (node) => {
+      visited.set(node, true);
+      for (const dest of this.edges.get(node).keys()) {
+        if (!visited.has(dest)) topologicalSortUtil(dest);
+      }
+
+      stack.push(node);
+    };
+
+    for (const node of this.edges.keys()) {
+      if (!visited.has(node)) topologicalSortUtil(node);
+    }
+
+    return stack.reverse();
+  }
 }
 ```
 
@@ -197,5 +217,39 @@ class Graph {
     }
 
     return dist;
+  }
+```
+
+### 선행을 반드시 완료해야하는 위상 정렬
+
+```javascript
+  topologicalSort() {
+    const indegree = new Map();
+    const queue = [];
+    const res = [];
+
+    for (const dests of this.edges.values()) {
+      for (const dest of dests.keys()) {
+        const alt = indegree.get(dest) || 0;
+        indegree.set(dest, alt);
+      }
+    }
+
+    indegree.forEach((cnt, key) => {
+      if (cnt === 0) queue.push(key);
+    });
+
+    while (queue.length > 0) {
+      const cur = queue.pop();
+      res.push(cur);
+
+      for (const next of this.edges.get(cur).keys()) {
+        const alt = indegree.get(next) - 1;
+        indegree.set(next, alt);
+        if (alt === 0) queue.push(next);
+      }
+    }
+
+    return res;
   }
 ```
