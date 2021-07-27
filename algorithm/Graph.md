@@ -1,189 +1,148 @@
 # 그래프
 
-## 1. 지향성 그래프
+## 1. 지향성 그래프.
 
-Vertex의 Key 값으로 순차적인 숫자가 아닌 어떤것이 쓰여도 상관 없도록, Map을 사용해서 만들었다. Vertext의 Key가 순차적인 숫자일 경우 배열을 사용하여 최적화 하는 것이 속도가 빠르다.
+그래프의 노드는 1~n의 키를 가지고 있음
 
 ```javascript
 class Graph {
-  constructor() {
-    this.edges = new Map();
+  constructor(n) {
+    this.size = n + 1;
+    this.adj = Array.from({ length: this.size }, () => []);
   }
 
-  addVertex(ver) {
-    if (this.edges.has(ver)) return;
-    this.edges.set(ver, new Map());
+  addEdge(origin, dest, weight = 1) {
+    this.adj[origin].push([dest, weight]);
   }
 
-  addEdge(origin, dest, weight) {
-    if (!this.edges.has(origin)) this.addVertex(origin);
-    if (!this.edges.has(dest)) this.addVertex(dest);
+  bfs(source, func) {
+    const visit = Array(this.size).fill(false);
+    const queue = [source];
 
-    this.edges.get(origin).set(dest, weight);
-  }
+    while (queue.length) {
+      const cur = queue.shift();
+      func(cur);
 
-  removeEdge(origin, dest) {
-    if (!this.edges.has(origin)) return;
-    this.edges.get(origin).delete(dest);
-  }
+      this.adj[cur].forEach((neighbor) => {
+        if (visit[neighbor]) return;
 
-  removeVertex(ver) {
-    if (this.edges.has(ver)) this.edges.delete(ver);
-    this.edges.forEach((map) => {
-      if (map.has(ver)) map.delete(ver);
-    });
-  }
-
-  bfs(ver, func) {
-    if (!this.edges.has(ver)) return;
-
-    const visited = Array(this.edges.size);
-    let list = [ver];
-
-    while (list.length > 0) {
-      const temp = [];
-
-      for (let i = 0; i < list.length; i += 1) {
-        const cur = list[i];
-
-        if (visited[cur]) continue;
-        visited[cur] = true;
-        func(ver);
-
-        this.edges.get(cur).forEach((_, dest) => {
-          temp.push(dest);
-        });
-      }
-
-      list = temp;
+        visit[neighbor] = true;
+        queue.push(neighbor);
+      });
     }
   }
 
-  dfs(ver, func) {
-    if (!this.edges.has(ver)) return;
+  dfs(source, func) {
+    const visit = Array(this.size).fill(false);
+    const stack = [source];
 
-    const visited = Array(this.edges.size);
-    const stack = [ver];
-
-    while (stack.length > 0) {
+    while (stack.length) {
       const cur = stack.pop();
-      visited[cur] = true;
-      func();
+      func(cur);
 
-      this.edges.get(cur).forEach((_, dest) => {
-        if (!visited[dest]) stack.push(dest);
+      this.adj.forEach((neighbor) => {
+        if (visit[neighbor]) return;
+
+        visit[neighbor] = true;
+        stack.push(neighbor);
       });
     }
   }
 
   dijkstra(source) {
-    if (!this.edges.has(source)) return null;
+    const visit = Array(this.size).fill(false);
+    const dist = Array(this.size).fill(Infinity);
 
-    const notVisited = new Map();
-    const dist = new Map();
+    dist[source] = 0;
 
-    this.edges.forEach((_, ver) => {
-      dist.set(ver, Infinity);
-      notVisited.set(true);
-    });
-
-    dist.set(source, 0);
-
-    while (notVisited.size > 0) {
+    while (true) {
       let minDist = Infinity;
-      let minDistVer = null;
+      let minNode = null;
 
-      notVisited.forEach((_, ver) => {
-        if (dist.get(ver) < minDist) {
-          minDist = dist.get(ver);
-          minDistVer = ver;
+      for (let node = 1; node < this.size; node += 1) {
+        if (!visit[node] && dist[node] < minDist) {
+          minDist = dist[node];
+          minNode = node;
         }
-      });
+      }
 
-      notVisited.delete(minDistVer);
+      if (minNode === null) break;
+      visit[minNode] = true;
 
-      this.edges.get(minDistVer).forEach((_, neighbor) => {
-        const alt = minDist + this.edges.get(minDistVer).get(neighbor);
-        if (alt < dist.get(neighbor)) dist.set(neighbor, alt);
+      this.adj[minNode].forEach(([neighbor, weight]) => {
+        const alt = minDist + weight;
+        if (alt < dist[neighbor]) dist[neighbor] = alt;
       });
     }
+
+    return dist;
   }
 
   bellmanFord(source) {
-    if (!this.edges.has(source)) return null;
+    const dist = Array(this.size).fill(Infinity);
+    dist[source] = 0;
 
-    const dist = new Map();
+    for (let i = 1; i < this.size; i += 1) {
+      for (let node = 1; node < this.size; node += 1) {
+        if (isFinite(dist[node])) continue;
 
-    this.edges.forEach((_, ver) => dist.set(ver, Infinity));
-    dist.set(source, 0);
-
-    for (let i = 0; i < this.edges.size; i += 1) {
-      this.edges.forEach((map, cur) => {
-        if (isFinite(dist.get(cur))) {
-          map.forEach((weight, next) => {
-            const alt = Math.min(dist.get(next), dist.get(cur) + weight);
-            dist.set(next, alt);
-          });
-        }
-      });
+        this.adj[node].forEach(([neighbor, weight]) => {
+          const alt = dist[node] + weight;
+          if (alt < dist[neighbor]) dist[neighbor] = alt;
+        });
+      }
     }
 
-    for (const [cur, map] of this.edges.entries()) {
-      for (const [next, weight] of map.entries()) {
-        if (dist.get(next) > dist.get(cur) + weight) return null;
-      }
+    for (let node = 1; node < this.size; node += 1) {
+      this.adj[node].forEach(([neighbor, weight]) => {
+        if (dist[neighbor] > dist[cur] + weight) return null;
+      });
     }
 
     return dist;
   }
 
   floyd() {
-    const dist = new Map();
-    const distChild = new Map();
+    const dist = Array.from({ length: this.size }, () =>
+      Array(this.size).fill(Infinity)
+    );
 
-    for (const key of this.edges.keys()) {
-      distChild.set(key, Infinity);
+    for (let node = 1; node < this.size; node += 1) {
+      dist[node][node] = 0;
+      this.adj[node].forEach(([neighbor, weight]) => {
+        dist[node][neighbor] = weight;
+      });
     }
 
-    this.edges.forEach((map, origin) => {
-      const curChild = new Map(distChild);
-      curChild.set(origin, 0);
-      map.forEach((weight, dest) => {
-        curChild.set(dest, weight);
-      });
+    for (let mid = 1; mid < this.size; mid += 1) {
+      for (let origin = 1; origin < this.size; origin += 1) {
+        if (origin === mid) continue;
 
-      dist.set(origin, curChild);
-    });
-
-    for (const k of this.edges.keys()) {
-      dist.forEach((child, i) => {
-        if (k === i) return;
-
-        child.forEach((cur, j) => {
-          const alt = Math.min(cur, dist.get(i).get(k) + dist.get(k).get(j));
-          dist.get(i).set(j, alt);
-        });
-      });
+        for (let dest = 1; dest < this.size; dest += 1) {
+          const alt = dist[origin][mid] + dist[mid][dest];
+          if (alt < dist[origin][dest]) dist[origin][dest] = alt;
+        }
+      }
     }
 
     return dist;
   }
 
   topologicalSort() {
-    const visited = new Map();
+    const visit = Array(this.size).fill(false);
     const stack = [];
 
     const topologicalSortUtil = (node) => {
-      visited.set(node, true);
-      for (const dest of this.edges.get(node).keys()) {
-        if (!visited.has(dest)) topologicalSortUtil(dest);
-      }
+      visit[node] = true;
+      this.adj[node].forEach(([neighbor]) => {
+        if (!visit[neighbor]) topologicalSortUtil(neighbor);
+      });
 
       stack.push(node);
     };
 
-    for (const node of this.edges.keys()) {
-      if (!visited.has(node)) topologicalSortUtil(node);
+    for (let node = 1; node < this.size; node += 1) {
+      if (!visit[node]) topologicalSortUtil(node);
     }
 
     return stack.reverse();
@@ -193,27 +152,26 @@ class Graph {
 
 ### Heap과 함께 다익스트라를 사용했을 경우
 
+[Heap 알고리즘 구현 보기](./Heap.md)
+
 ```javascript
   dijkstra(source) {
-    if (!this.edges.has(source)) return null;
-
-    const dist = new Map();
+    const = Array(this.size + 1);
     const heap = new Heap((a, b) => a[1] < b[1]);
 
-    this.edges.forEach((_, ver) => dist.set(ver, Infinity));
-    dist.set(source, 0);
     heap.add([source, 0]);
 
-    while (heap.size > 0) {
-      const [minVer, minDist] = heap.poll();
+    while (heap.size) {
+      const [minNode, minDist] = heap.poll();
 
-      this.edges.get(minVer).forEach((weight, neighbor) => {
+      if (dist[minNode] !== undefined) continue;
+      dist[minNode] = minDist;
+
+      this.adj[minNode].forEach(([neighbor, weight]) => {
+        if (dist[neighbor] !== undefined) return;
         const alt = minDist + weight;
-        if (dist.get(neighbor) > alt) {
-          dist.set(neighbor, alt);
-          heap.add([neighbor, alt]);
-        }
-      });
+        heap.add([neighbor, alt]);
+      })
     }
 
     return dist;
@@ -224,30 +182,28 @@ class Graph {
 
 ```javascript
   topologicalSort() {
-    const indegree = new Map();
-    const queue = [];
+    const indegree = Array(this.size).fill(0);
+    const stack = [];
     const res = [];
 
-    for (const dests of this.edges.values()) {
-      for (const dest of dests.keys()) {
-        const alt = indegree.get(dest) || 0;
-        indegree.set(dest, alt);
-      }
+    for (let i = 1; i < this.size; i += 1) {
+      this.adj[i].forEach(([node]) => {
+        indegree[node] += 1;
+      });
     }
 
-    indegree.forEach((cnt, key) => {
-      if (cnt === 0) queue.push(key);
+    indegree.forEach((cnt, node) => {
+      if (cnt === 0) stack.push(node);
     });
 
-    while (queue.length > 0) {
-      const cur = queue.pop();
-      res.push(cur);
+    while (stack.length) {
+      const node = stack.pop();
+      res.push(node);
 
-      for (const next of this.edges.get(cur).keys()) {
-        const alt = indegree.get(next) - 1;
-        indegree.set(next, alt);
-        if (alt === 0) queue.push(next);
-      }
+      this.adj[node].forEach((neighbor) => {
+        indegree[neighbor] -= 1;
+        if (indegree[neighbor] === 0) stack.push(neighbor);
+      });
     }
 
     return res;
