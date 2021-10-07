@@ -114,11 +114,11 @@ class Graph {
       });
     }
 
-    for (let mid = 1; mid < this.size; mid += 1) {
-      for (let origin = 1; origin < this.size; origin += 1) {
+    for (let mid = 1; mid <= this.size; mid += 1) {
+      for (let origin = 1; origin <= this.size; origin += 1) {
         if (origin === mid) continue;
 
-        for (let dest = 1; dest < this.size; dest += 1) {
+        for (let dest = 1; dest <= this.size; dest += 1) {
           const alt = dist[origin][mid] + dist[mid][dest];
           if (alt < dist[origin][dest]) dist[origin][dest] = alt;
         }
