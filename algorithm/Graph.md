@@ -84,7 +84,7 @@ class Graph {
 
     for (let i = 1; i < this.size; i += 1) {
       for (let node = 1; node < this.size; node += 1) {
-        if (isFinite(dist[node])) continue;
+        if (!isFinite(dist[node])) continue;
 
         this.adj[node].forEach(([neighbor, weight]) => {
           const alt = dist[node] + weight;

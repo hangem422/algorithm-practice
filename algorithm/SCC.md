@@ -48,7 +48,7 @@ function makeSCC(v, stack, recon) {
   const visit = Array(v + 1).fill(false);
   const res = [];
 
-  for (let i = v - 1; i > 0; i -= 1) {
+  for (let i = stack.length - 1; i >= 0; i -= 1) {
     const node = stack[i];
     if (visit[node]) continue;
 

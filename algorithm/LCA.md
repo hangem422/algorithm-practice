@@ -55,6 +55,7 @@ class LCATree {
   lca(a, b) {
     let [deep, shallow] = this.depth[a] < this.depth[b] ? [b, a] : [a, b];
     while (this.compareDepth(deep, shallow) !== 0) {
+      console.log(a, b);
       deep = this.GetCloseAnc(deep, shallow);
     }
 
