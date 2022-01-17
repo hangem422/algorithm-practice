@@ -1,6 +1,6 @@
 # Sum of Root To Leaf Binary Numbers
 
-[백준 문제 링크](https://leetcode.com/problems/sum-of-root-to-leaf-binary-numbers)
+[LeetCode 문제 링크](https://leetcode.com/problems/sum-of-root-to-leaf-binary-numbers)
 
 ```javascript
 /**
