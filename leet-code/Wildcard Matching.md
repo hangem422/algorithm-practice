@@ -22,6 +22,8 @@ var isMatch = function (s, p) {
 
 ## 2. DFS를 사용해서 풀어보기
 
+시간 초과로 실패했다.
+
 ```javascript
 /**
  * @param {string} s
