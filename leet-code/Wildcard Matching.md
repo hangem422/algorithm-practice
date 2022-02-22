@@ -15,7 +15,6 @@
 var isMatch = function (s, p) {
   const regStr = p.replace(/\?/g, "\\S").replace(/\*+/g, ".*");
   const regExp = new RegExp(`^${regStr}$`);
-  console.log(`^${regStr}$`);
   return regExp.test(s);
 };
 ```
