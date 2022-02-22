@@ -35,12 +35,16 @@ var isMatch = function (s, p) {
 };
 
 function patterMatching(s, si, p, pi) {
-  if (p[pi] === "*") {
-    return handleStartPattern(s, si, p, pi);
+  if (si === s.length) {
+    return getNextIndexOfStarString(p, pi) === -1;
   }
 
-  if (si === s.length || pi === p.length) {
-    return si === s.length && pi === p.length;
+  if (pi === p.length) {
+    return si === s.length;
+  }
+
+  if (p[pi] === "*") {
+    return handleStartPattern(s, si, p, pi);
   }
 
   if (p[pi] === "?") {
@@ -66,7 +70,7 @@ function handleStartPattern(s, si, p, pi) {
 }
 
 function getNextIndexOfStarString(str, index) {
-  for (let i = index + 1; i < str.length; i += 1) {
+  for (let i = index; i < str.length; i += 1) {
     if (str[i] !== "*") {
       return i;
     }
