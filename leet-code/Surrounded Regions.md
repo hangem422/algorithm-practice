@@ -2,8 +2,6 @@
 
 [LeetCode 문제 링크](https://leetcode.com/problems/surrounded-regions)
 
-## 모든 노드를 수정하는 방법
-
 ```javascript
 const ROW_DIR = [-1, 0, 1, 0];
 const COL_DIR = [0, 1, 0, -1];
