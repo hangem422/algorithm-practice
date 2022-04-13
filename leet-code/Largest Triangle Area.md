@@ -1,6 +1,6 @@
 # Largest Triangle Area
 
-[LeetCode 문제 링크](https://leetcode.com/problems/maximum-units-on-a-truck)
+[LeetCode 문제 링크](https://leetcode.com/problems/largest-triangle-area)
 
 ```javascript
 /**
