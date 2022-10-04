@@ -60,15 +60,25 @@ function swap(arr, index1, index2) {
 function partition(arr, left, right) {
   const mid = Math.floor((left + right) / 2);
   const pivot = arr[mid];
+  let leftIndex = left;
+  let rightIndex = right;
 
-  while (left <= right) {
-    while (pivot > arr[left]) left += 1;
-    while (pivot < arr[right]) right -= 1;
+  while (leftIndex <= rightIndex) {
+    while (pivot > arr[leftIndex] && leftIndex <= right) {
+      leftIndex += 1;
+    }
+    while (pivot < arr[rightIndex] && rightIndex >= left) {
+      rightIndex -= 1;
+    }
 
-    if (left <= right) swap(arr, left++, right--);
+    if (leftIndex <= rightIndex) {
+      swap(arr, leftIndex, rightIndex);
+      leftIndex += 1;
+      rightIndex -= 1;
+    }
   }
 
-  return left;
+  return leftIndex;
 }
 
 function quickSort(arr, left, right) {
