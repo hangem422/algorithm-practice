@@ -1,6 +1,6 @@
 # Kth Largest Element in an Array
 
-[LeetCode 문제 링크](https://leetcode.com/problems/largest-number-after-digit-swaps-by-parity)
+[LeetCode 문제 링크](https://leetcode.com/problems/kth-largest-element-in-an-array)
 
 ```typescript
 function findKthLargest(nums: number[], k: number): number {
