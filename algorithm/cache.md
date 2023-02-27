@@ -33,7 +33,8 @@ class LFUDoublyLinkedList {
   removeAtTail() {
     const oldTail = this.tail.prev;
     if (oldTail !== this.head) {
-      return this.removeNode(oldTail);
+      this.removeNode(oldTail);
+      return oldTail;
     }
     return null;
   }
@@ -107,18 +108,16 @@ class LFUCache {
   }
 
   #makeSpaceForNewNode() {
-    if (this.keys.size < this.capacity) {
+    if (this.keys.size <= this.capacity) {
       return;
     }
 
     const oldTail = this.freq.get(this.minFreq).removeAtTail();
     this.keys.delete(oldTail.key);
-    this.size -= 1;
   }
 
   #insertNodeAtFreqHead(node, freq) {
     this.freq.get(freq).insertAtHead(node);
-    this.size += 1;
   }
 }
 ```
