@@ -72,7 +72,7 @@ function partition(arr, left, right) {
     }
 
     if (leftIndex <= rightIndex) {
-      swap(arr, leftIndex, rightIndex);
+      if (leftIndex !== rightIndex) swap(arr, leftIndex, rightIndex);
       leftIndex += 1;
       rightIndex -= 1;
     }
