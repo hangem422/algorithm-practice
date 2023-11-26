@@ -1,0 +1,14 @@
+{
+  "name": "algorithm-practice",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://hangem422@github.com/hangem422/algorithm-practice.git",
+  "author": "Hant <hangem422@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@type-challenges/utils": "^0.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}

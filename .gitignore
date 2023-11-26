@@ -3,3 +3,5 @@ test*.js
 test*.ts
 /input.txt
 /output.txt
+
+node_modules
