@@ -1,7 +1,6 @@
 .DS_Store
 test*.js
 test*.ts
-/input.txt
-/output.txt
+dev
 
 node_modules
